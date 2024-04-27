@@ -128,7 +128,28 @@ def test_create_user_numbers_in_first_name_get_success_response():
 # Test10. Не должен проходить.
 # Параметр не передан в запросе
 def test_create_user_without_transferred_parametr_in_first_name_get_negative_response():
-    negative_assert()
+
+    # спасибо Илье Шишину, который объяснил мне, что: Функция negative_assert принимает обязательный параметр
+    # new_kit_name, если его не передать при вызове этой функции, то функция вернет ошибку.
+    # Также в этом тест-кейсе тебе нужно проверить пустое тело запроса kit_body = {},
+    # поэтому ты не можешь в этом тест-кейсе использовать функцию negative_assert (она принимает параметром имя набора а не тело запроса).
+    # Можно прямо в тесте вызвать функцию создания набора и проверить код ответа.
+
+    # создаем нового пользователя с данными из data.user_body
+    new_user_response = sender_stand_request.post_new_user(data.user_body)
+
+    # сохраняем токен авторизации для нового пользователя
+    auth_token = new_user_response.json()["authToken"]
+    # проверяем что токен авторизации не пустой
+    assert auth_token != ""
+
+    # создаем новый кит для этого пользователя с новым именем набора
+    kit_body = get_kit_body(None)
+
+    # отправляем запрос на сервер на создание нового набора
+    new_kit_response = sender_stand_request.post_new_client_kit(kit_body, auth_token)
+
+    assert new_kit_response.json()["code"] == 400
 
 # Test11. Не должен проходить.
 # Передан другой тип параметра (число)
